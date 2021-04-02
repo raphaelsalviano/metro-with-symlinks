@@ -58,20 +58,33 @@ module.exports = symlinkedDependencies => {
         ${getProjectRoots}
       ];
 
-      module.exports = {
-        resolver: {
-          extraNodeModules,
-          blacklistRE: require('metro-config/src/defaults/blacklist')(blacklistRegexes)
-        },
-        watchFolders,
-        transformer: {
-          getTransformOptions: async () => ({
-            transform: {
-              experimentalImportSupport: false,
-              inlineRequires: true,
+      const metroVersion = require('metro/package.json').version;
+      const metroVersionComponents = metroVersion.split('.');
+      if (metroVersionComponents[0] === '0' && parseInt(metroVersionComponents[1], 10) >= 43) {
+          module.exports = {
+            resolver: {
+              extraNodeModules,
+              blacklistRE: require('metro-config/src/defaults/blacklist')(blacklistRegexes)
             },
-          }),
-        }
-      };
+            watchFolders,
+            transformer: {
+              getTransformOptions: async () => ({
+                transform: {
+                  experimentalImportSupport: false,
+                  inlineRequires: true,
+                },
+              }),
+            }
+          };
+      } else {
+          module.exports = {
+            extraNodeModules,
+            getBlacklistRE: () => require('metro/src/blacklist')(blacklistRegexes),
+            getProjectRoots: () => [path.resolve(__dirname)].concat(watchFolders)
+          };
+      }
+
+
+      
    `
 }
