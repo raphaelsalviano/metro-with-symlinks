@@ -66,7 +66,15 @@ module.exports = symlinkedDependencies => {
               extraNodeModules,
               blacklistRE: require('metro-config/src/defaults/blacklist')(blacklistRegexes)
             },
-            watchFolders
+            watchFolders,
+            transformer: {
+              getTransformOptions: async () => ({
+                transform: {
+                  experimentalImportSupport: false,
+                  inlineRequires: true,
+                },
+              }),
+            }
           };
       } else {
           module.exports = {
