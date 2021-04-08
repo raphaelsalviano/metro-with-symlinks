@@ -5,8 +5,6 @@
 //     - https://github.com/facebook/metro/issues/1#issuecomment-346502388
 //     - https://github.com/facebook/metro/issues/1#issuecomment-334546083
 
-const fs = require('fs')
-const exec = require('child_process').execSync
 const dedent = require('dedent-js')
 const getDependencyPath = require('./getDependencyPath')
 
@@ -58,33 +56,21 @@ module.exports = symlinkedDependencies => {
         ${getProjectRoots}
       ];
 
-      const metroVersion = require('metro/package.json').version;
-      const metroVersionComponents = metroVersion.split('.');
-      if (metroVersionComponents[0] === '0' && parseInt(metroVersionComponents[1], 10) >= 43) {
-          module.exports = {
-            resolver: {
-              extraNodeModules,
-              blacklistRE: require('metro-config/src/defaults/blacklist')(blacklistRegexes)
+      module.exports = {
+        resolver: {
+          extraNodeModules,
+          blacklistRE: require('metro-config/src/defaults/blacklist')(blacklistRegexes)
+        },
+        watchFolders,
+        transformer: {
+          getTransformOptions: async () => ({
+            transform: {
+              experimentalImportSupport: false,
+              inlineRequires: true,
             },
-            watchFolders,
-            transformer: {
-              getTransformOptions: async () => ({
-                transform: {
-                  experimentalImportSupport: false,
-                  inlineRequires: true,
-                },
-              }),
-            }
-          };
-      } else {
-          module.exports = {
-            extraNodeModules,
-            getBlacklistRE: () => require('metro/src/blacklist')(blacklistRegexes),
-            getProjectRoots: () => [path.resolve(__dirname)].concat(watchFolders)
-          };
-      }
+          }),
+        }
+      };
 
-
-      
    `
 }
